@@ -41,5 +41,4 @@ public class FuncionarioController {
             throw new Exception("CPF é inválido!");
         }
     }
-
 }

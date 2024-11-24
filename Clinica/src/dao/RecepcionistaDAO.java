@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class RecepcionistaDAO {
 
@@ -76,4 +77,34 @@ public class RecepcionistaDAO {
         return null;
     }
     
+    public List<Recepcionista> getAllRecepcionistas() throws ExceptionDAO{
+        String sql = "SELECT * FROM Pessoa p "
+                 + "JOIN Funcionario f ON p.idPessoa = f.idPessoa "
+                 + "JOIN Recepcionista r ON f.idFuncionario = r.idFuncionario";
+  
+        List<Recepcionista> recepcionistas = new ArrayList<>();
+  
+        try(
+           Connection conn = new ConexaoBD().getConnection();
+           PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+           ResultSet rs = stmt.executeQuery();
+  
+           while (rs.next()) {
+              Recepcionista recepcionista = new Recepcionista();
+              recepcionista.setIdRecepcionista(rs.getInt("idRecepcionista"));
+              recepcionista.setIdPessoa(rs.getInt("idPessoa"));
+              recepcionista.setNome(rs.getString("nome"));
+              recepcionista.setTelefone(rs.getString("telefone"));
+              recepcionista.setCpf(rs.getString("cpf"));
+  
+              recepcionistas.add(recepcionista);
+           }
+        } catch (SQLException e) {
+           e.printStackTrace();
+           throw new ExceptionDAO("Erro ao buscar todos os recepcionistas cadastrados: " + e.getMessage());
+        }
+  
+        return recepcionistas;
+    }
 }

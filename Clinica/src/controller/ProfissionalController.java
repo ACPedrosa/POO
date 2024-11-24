@@ -1,14 +1,10 @@
 package controller;
 
 import java.sql.Date;
-import java.sql.SQLException;
 
 import dao.FuncionarioDAO;
 import dao.PessoaDAO;
 import dao.ProfissionalDAO;
-import dao.ExceptionDAO;
-
-import model.Profissional;
 import model.Profissional;
 import model.Funcionario;
 import model.Pessoa;
@@ -65,13 +61,6 @@ public class ProfissionalController {
         }
     }
 
-    public Profissional getProfissionalById(int idProfissional) throws Exception {
-        if (idProfissional > 0) {
-            return new ProfissionalDAO().getProfissionalById(idProfissional);
-        } else {
-            throw new Exception("ID do Profissional é inválido!");
-        }
-    }
 
     public Profissional getProfissionalByRegistro(String registroConselho) throws Exception {
         if (registroConselho != null && !registroConselho.isEmpty()) {
@@ -80,27 +69,12 @@ public class ProfissionalController {
             throw new Exception("Registro de conselho é inválido!");
         }
     }
-
-    public boolean autenticarUsuario(String username, String password) throws ExceptionDAO, SQLException {
-	    Connection connection = null;
-	    PreparedStatement pStatement = null;
-	    ResultSet rs = null;
-
-	    try {
-	        connection = new ConexaoBD().getConnection();
-	        String sql = "SELECT * FROM Usuario WHERE username = ? AND password = ?";
-	        pStatement = connection.prepareStatement(sql);
-	        pStatement.setString(1, username);
-	        pStatement.setString(2, password);
-	        rs = pStatement.executeQuery();
-
-	        return rs.next(); // Retorna true se encontrar o usuário
-	    } catch (SQLException e) {
-	        throw new ExceptionDAO("Erro ao autenticar usuário: " + e.getMessage());
-	    } finally {
-	        if (rs != null) rs.close();
-	        if (pStatement != null) pStatement.close();
-	        if (connection != null) connection.close();
-	    }
-	}
+    
+    public Profissional getProfissionalByCpf(String cpf) throws Exception {
+        if (cpf != null && !cpf.isEmpty()) {
+            return new ProfissionalDAO().getProfissionalByCpf(cpf);
+        } else {
+            throw new Exception("CPF é inválido!");
+        }
+    }
 }

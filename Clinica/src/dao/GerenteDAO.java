@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
 import model.Gerente;
+import model.Recepcionista;
 
 public class GerenteDAO {
 
@@ -53,10 +57,13 @@ public class GerenteDAO {
     public Gerente getGerenteByCpf(String cpf) throws ExceptionDAO {
         Gerente gerente = null;
         String sql = "SELECT * FROM Gerente g JOIN Pessoa p ON g.idPessoa = p.idPessoa WHERE p.cpf = ?";
+        
         try (Connection conn = new ConexaoBD().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
             stmt.setString(1, cpf);
             ResultSet rs = stmt.executeQuery();
+            
             if (rs.next()) {
                 gerente = new Gerente();
                 gerente.setIdGerente(rs.getInt("idGerente"));
@@ -69,5 +76,32 @@ public class GerenteDAO {
             throw new ExceptionDAO("Erro ao buscar Gerente: " + e.getMessage());
         }
         return gerente;
+    }
+
+    public List<Gerente> getAllGerentes() throws ExceptionDAO{
+        String sql = "SELECT * FROM Gerente g JOIN Pessoa p ON g.idPessoa = p.idPessoa";
+  
+        List<Gerente> gerentes = new ArrayList<>();
+  
+        try (Connection conn = new ConexaoBD().getConnection();
+        PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+                ResultSet rs = stmt.executeQuery();
+        
+                while (rs.next()) {
+                    Gerente gerente = new Gerente();
+                    gerente.setIdGerente(rs.getInt("idGerente"));
+                    gerente.setLogin(rs.getString("login"));
+                    gerente.setSenha(rs.getString("senha"));
+                    gerente.setCargo(rs.getString("cargo"));
+  
+                    gerentes.add(gerente);
+                }
+        } catch (SQLException e) {
+           e.printStackTrace();
+           throw new ExceptionDAO("Erro ao buscar todos os gerentes cadastrados: " + e.getMessage());
+        }
+  
+        return gerentes;
     }
 }

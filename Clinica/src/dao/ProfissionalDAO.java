@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Profissional;
 
@@ -47,7 +49,6 @@ public class ProfissionalDAO {
             throw new ExceptionDAO("Erro ao excluir profissional: " + e.getMessage());
         }
     }
-
     
     public Profissional getProfissionalById(int idProfissional) throws ExceptionDAO {
         String sql = "SELECT * FROM Profissional WHERE idProfissional = ?";
@@ -71,6 +72,7 @@ public class ProfissionalDAO {
 
     public Profissional getProfissionalByRegistro(String registroConselho) throws ExceptionDAO {
         String sql = "SELECT * FROM Profissional WHERE registroConselho = ?";
+        
         try (Connection conn = new ConexaoBD().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, registroConselho);
@@ -87,5 +89,32 @@ public class ProfissionalDAO {
             throw new ExceptionDAO("Erro ao buscar profissional: " + e.getMessage());
         }
         return null; // Retorna null se não encontrar
+    }
+
+    public List<Profissional> getAllProfissionais() throws ExceptionDAO {
+        String sql = "SELECT * FROM Profissional p";
+
+        List<Profissional> profissionais = new ArrayList<>();
+
+        try (Connection conn = new ConexaoBD().getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                Profissional profissional = new Profissional();
+                profissional.setIdProfissional(rs.getInt("idProfissional"));
+                profissional.setEspecialidade(rs.getString("especialidade"));
+                profissional.setRegistroConselho(rs.getString("registroConselho"));
+                profissional.setDataInscricao(rs.getDate("dataInscricao"));
+                
+                profissionais.add(profissional);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new ExceptionDAO("Erro ao buscar todos os profissionais cadastrados: " + e.getMessage());
+        }
+
+        return profissionais;
     }
 }

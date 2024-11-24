@@ -1,10 +1,6 @@
 package controller;
 
-import java.sql.SQLException;
-
-import dao.ExceptionDAO;
 import dao.PacienteDAO;
-
 import model.Paciente;
 import model.Pessoa;
 
@@ -47,29 +43,6 @@ public class PacienteController {
 		} else {
 			throw new Exception("ID do Paciente é inválido!");
 		}
-	}
-
-	public boolean autenticarUsuario(String username, String password) throws ExceptionDAO, SQLException {
-	    Connection connection = null;
-	    PreparedStatement pStatement = null;
-	    ResultSet rs = null;
-
-	    try {
-	        connection = new ConexaoBD().getConnection();
-	        String sql = "SELECT * FROM Usuario WHERE username = ? AND password = ?";
-	        pStatement = connection.prepareStatement(sql);
-	        pStatement.setString(1, username);
-	        pStatement.setString(2, password);
-	        rs = pStatement.executeQuery();
-
-	        return rs.next(); // Retorna true se encontrar o usuário
-	    } catch (SQLException e) {
-	        throw new ExceptionDAO("Erro ao autenticar usuário: " + e.getMessage());
-	    } finally {
-	        if (rs != null) rs.close();
-	        if (pStatement != null) pStatement.close();
-	        if (connection != null) connection.close();
-	    }
 	}
 
 }
