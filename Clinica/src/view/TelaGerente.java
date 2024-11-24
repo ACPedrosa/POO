@@ -3,13 +3,14 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.sql.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -68,7 +69,7 @@ public class TelaGerente extends JFrame {
         titleLabel.setForeground(new Color(47, 85, 151));
         centerPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Tabela de dados//substituir pelo método list
+        // Tabela de dados
         String[] colunas = {"ID", "Nome", "Cargo"};
         String[][] funcionariosData = {
             {"1", "João Silva", "Recepcionista"},
@@ -122,11 +123,14 @@ public class TelaGerente extends JFrame {
             JTextField enderecoField = new JTextField();
             JTextField loginField = new JTextField();
             JPasswordField senhaField = new JPasswordField();
-            JTextField cargoField = new JTextField();
+            JComboBox<String> cargoComboBox = new JComboBox<>(new String[] { "Recepcionista", "Profissional" });
+            JTextField especialidadeField = new JTextField();
+            JTextField registroConselhoField = new JTextField();
+            JTextField dataInscricaoField = new JTextField();
         
             // Painel do formulário
             JPanel formPanel = new JPanel();
-            formPanel.setLayout(new GridLayout(11, 2, 10, 10)); // Ajustado para 11 linhas e 2 colunas, com espaçamento
+            formPanel.setLayout(new GridLayout(14, 2, 10, 10)); // Ajustado para 14 linhas e 2 colunas, com espaçamento
             formPanel.add(new JLabel("Nome:"));
             formPanel.add(nomeField);
             formPanel.add(new JLabel("Telefone:"));
@@ -148,13 +152,40 @@ public class TelaGerente extends JFrame {
             formPanel.add(new JLabel("Senha:"));
             formPanel.add(senhaField);
             formPanel.add(new JLabel("Cargo:"));
-            formPanel.add(cargoField);
+            formPanel.add(cargoComboBox);
+        
+            // Campos adicionais para "Profissional"
+            formPanel.add(new JLabel("Especialidade:"));
+            formPanel.add(especialidadeField);
+            formPanel.add(new JLabel("Registro no Conselho:"));
+            formPanel.add(registroConselhoField);
+            formPanel.add(new JLabel("Data de Inscrição:"));
+            formPanel.add(dataInscricaoField);
+        
+            // Inicialmente, os campos adicionais para "Profissional" ficam invisíveis
+            especialidadeField.setVisible(false);
+            registroConselhoField.setVisible(false);
+            dataInscricaoField.setVisible(false);
+        
+            // Adiciona um ouvinte para o JComboBox (quando mudar a seleção do cargo)
+            cargoComboBox.addActionListener(event -> {
+                String cargoSelecionado = (String) cargoComboBox.getSelectedItem();
+                if ("Profissional".equals(cargoSelecionado)) {
+                    especialidadeField.setVisible(true);
+                    registroConselhoField.setVisible(true);
+                    dataInscricaoField.setVisible(true);
+                } else {
+                    especialidadeField.setVisible(false);
+                    registroConselhoField.setVisible(false);
+                    dataInscricaoField.setVisible(false);
+                }
+                formPanel.revalidate(); // Revalida o painel para aplicar a visibilidade correta dos campos
+            });
         
             // Exibe o formulário em um JOptionPane
             int result = JOptionPane.showConfirmDialog(null, formPanel, "Cadastrar Funcionário",
                     JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         
-            // Captura os dados preenchidos
             if (result == JOptionPane.OK_OPTION) {
                 try {
                     // Captura os valores dos campos
@@ -168,11 +199,16 @@ public class TelaGerente extends JFrame {
                     String endereco = enderecoField.getText();
                     String login = loginField.getText();
                     String senha = new String(senhaField.getPassword());
-                    String cargo = cargoField.getText();
+                    String cargo = (String) cargoComboBox.getSelectedItem();
+                    String especialidade = especialidadeField.getText();
+                    String registroConselho = registroConselhoField.getText();
+                    String dataInscricao = dataInscricaoField.getText();
         
-                    // Validação básica
-                    if (nome.isEmpty() || telefone.isEmpty() || login.isEmpty() || senha.isEmpty() || cargo.isEmpty()) {
-                        throw new Exception("Preencha todos os campos obrigatórios!");
+                    // Verifique se todos os campos obrigatórios foram preenchidos
+                    if (nome.isEmpty() || telefone.isEmpty() || rg.isEmpty() || cpf.isEmpty() || dataNascimento.isEmpty() ||
+                            sexo.isEmpty() || profissao.isEmpty() || endereco.isEmpty() || login.isEmpty() || senha.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Todos os campos obrigatórios devem ser preenchidos.");
+                        return;
                     }
         
                     // Criar a instância de Pessoa e Funcionario
@@ -182,16 +218,14 @@ public class TelaGerente extends JFrame {
         
                     // Mensagem de sucesso
                     JOptionPane.showMessageDialog(null, "Funcionário cadastrado com sucesso!");
-        
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(null, "Erro ao processar os dados: " + ex.getMessage());
+
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Erro ao cadastrar funcionário: " + ex.getMessage());
-                    ex.printStackTrace();
                 }
             }
         });
-        
+
+
         btnEditar.addActionListener(e -> {
             int selectedRow = funcionariosData.length;
             if (selectedRow < 0) {
@@ -288,25 +322,17 @@ public class TelaGerente extends JFrame {
                 }
             }
         });
-        
-        
-        
     }
+
     private void configurarBotao(JButton botao, Color corFundo, Color corTexto) {
-        botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setBackground(corFundo);
         botao.setForeground(corTexto);
+        botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setFocusPainted(false);
-        botao.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        botao.setPreferredSize(new Dimension(150, 40));
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            TelaGerente tela = new TelaGerente();
-            tela.setVisible(true);
-        });
-    }
-    public static long getSerialversionuid() {
-        return serialVersionUID;
+        SwingUtilities.invokeLater(() -> new TelaGerente().setVisible(true));
     }
 }
