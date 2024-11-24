@@ -2,164 +2,296 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
 
-import model.Consulta.StatusConsulta;
+import model.Consulta;
+import controller.ProntuarioController;
 
 public class TelaConsulta extends JFrame {
-
     private static final long serialVersionUID = 1L;
-
-    // Labels e Campos de Entrada
-    private JLabel lblPaciente, lblData, lblHora, lblStatus;
-    private JTextField txtPaciente, txtData, txtHora;
-    private JComboBox<StatusConsulta> cmbStatus;
-
-    // Botões
-    private JButton btnCadastrar, btnConsultar, btnAlterar, btnExcluir, btnLimpar, btnVoltar;
+    private DefaultTableModel model;
 
     public TelaConsulta() {
-        super("Gerenciar Consultas");
-
-        // Configuração da Janela
+        // Configurações da janela
+        setTitle("Gerenciamento de Consultas");
         setSize(1024, 720);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        // Painel Principal
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
-        mainPanel.setBackground(new Color(200, 230, 255));
+        // Painel superior (Barra de navegação)
+        JPanel navBar = new JPanel(new BorderLayout());
+        navBar.setBackground(new Color(47, 85, 151));
+        navBar.setPreferredSize(new Dimension(0, 60));
+
+        JLabel userInfoLabel = new JLabel("CONSULTAS", JLabel.LEFT);
+        userInfoLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        userInfoLabel.setForeground(Color.WHITE);
+        userInfoLabel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 10));
+
+        JButton sairButton = new JButton("Sair");
+        sairButton.setForeground(Color.WHITE);
+        sairButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        sairButton.setBackground(new Color(220, 53, 69));
+        sairButton.setFocusPainted(false);
+        sairButton.setBorderPainted(false);
+        sairButton.setPreferredSize(new Dimension(80, 40));
+        //adicionar condicional para verificar o tipo de usuário
+        sairButton.addActionListener(e -> new TelaProfissional());
+
+        navBar.add(userInfoLabel, BorderLayout.WEST);
+        navBar.add(sairButton, BorderLayout.EAST);
+        add(navBar, BorderLayout.NORTH);
+
+        // Painel central (Tabela e botões)
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBackground(new Color(240, 248, 255));
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Título
-        JLabel titleLabel = new JLabel("Gerenciar Consultas", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("Gerenciamento de Consultas", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(50, 80, 120));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        titleLabel.setForeground(new Color(47, 85, 151));
+        centerPanel.add(titleLabel, BorderLayout.NORTH);
 
-        // Painel de Campos
-        JPanel fieldsPanel = new JPanel();
-        fieldsPanel.setLayout(new GridLayout(5, 2, 10, 10));
-        fieldsPanel.setBorder(BorderFactory.createEmptyBorder(50, 150, 20, 150));
-        fieldsPanel.setBackground(new Color(240, 240, 240));
+        // Definir as colunas da tabela para a consulta
+        String[] colunas = {
+            "ID Consulta", "ID Paciente", "ID Profissional", "Data Consulta", "Hora Consulta", "Status Consulta"
+        };
 
-        lblPaciente = new JLabel("Paciente:");
-        lblData = new JLabel("Data (AAAA-MM-DD):");
-        lblHora = new JLabel("Hora (HH:MM:SS):");
-        lblStatus = new JLabel("Status:");
-
-        lblPaciente.setFont(new Font("Arial", Font.BOLD, 18));
-        lblData.setFont(new Font("Arial", Font.BOLD, 18));
-        lblHora.setFont(new Font("Arial", Font.BOLD, 18));
-        lblStatus.setFont(new Font("Arial", Font.BOLD, 18));
-
-        txtPaciente = new JTextField();
-        txtData = new JTextField();
-        txtHora = new JTextField();
-        cmbStatus = new JComboBox<>(StatusConsulta.values());
-
-        // Define o tamanho fixo para as caixas de texto
-        Dimension textFieldSize = new Dimension(2, 2);
-        txtPaciente.setPreferredSize(new Dimension(2, 2));
-        txtData.setPreferredSize(textFieldSize);
-        txtHora.setPreferredSize(textFieldSize);
-
-        // Encapsula as caixas de texto em painéis individuais
-        JPanel pacientePanel = new JPanel(new BorderLayout());
-        pacientePanel.add(txtPaciente, BorderLayout.CENTER);
-
-        JPanel dataPanel = new JPanel(new BorderLayout());
-        dataPanel.add(txtData, BorderLayout.CENTER);
-
-        JPanel horaPanel = new JPanel(new BorderLayout());
-        horaPanel.add(txtHora, BorderLayout.CENTER);
-
-        JPanel statusPanel = new JPanel(new BorderLayout());
-        statusPanel.add(cmbStatus, BorderLayout.CENTER);
-
-        // Adiciona os rótulos e painéis ao fieldsPanel
-        fieldsPanel.add(lblPaciente);
-        fieldsPanel.add(pacientePanel);
-        fieldsPanel.add(lblData);
-        fieldsPanel.add(dataPanel);
-        fieldsPanel.add(lblHora);
-        fieldsPanel.add(horaPanel);
-        fieldsPanel.add(lblStatus);
-        fieldsPanel.add(statusPanel);
-
-        // Painel de Botões
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new GridLayout(1, 6, 10, 10)); // Ajustado para incluir 6 botões
-        buttonsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        buttonsPanel.setBackground(new Color(240, 240, 240));
-
-        btnCadastrar = new JButton("Cadastrar");
-        btnConsultar = new JButton("Consultar");
-        btnAlterar = new JButton("Alterar");
-        btnExcluir = new JButton("Excluir");
-        btnLimpar = new JButton("Limpar");
-        btnVoltar = new JButton("Voltar");
-
-        JButton[] buttons = {btnCadastrar, btnConsultar, btnAlterar, btnExcluir, btnLimpar, btnVoltar};
-        for (JButton button : buttons) {
-            button.setFont(new Font("Arial", Font.BOLD, 16));
-            button.setBackground(new Color(100, 150, 200));
-            button.setForeground(Color.WHITE);
-            button.setFocusPainted(false);
-            buttonsPanel.add(button);
-        }
-        btnVoltar.setBackground(new Color(200, 100, 100)); // Cor especial para "Voltar"
-
-         // Limpar campos
-         btnLimpar.addActionListener(e -> limparCampos());
-         // Voltar para a tela profissional
-         btnVoltar.addActionListener(e -> voltarParaTelaProfissional());
-
-        // Adicionar os painéis ao mainPanel
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
-        mainPanel.add(fieldsPanel, BorderLayout.CENTER);
-        mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
+        // Dados fictícios para a consulta
+        String[][] consultasData = {
+            {"101", "2001", "3001", "2024-11-25", "09:00", "AGENDADA"},
+            {"102", "2002", "3002", "2024-11-26", "10:30", "CANCELADA"},
+            {"103", "2003", "3003", "2024-11-27", "14:00", "CONCLUIDA"},
+            {"104", "2004", "3004", "2024-11-28", "08:30", "AGENDADA"},
+            {"105", "2005", "3005", "2024-11-29", "11:00", "CONCLUIDA"}
+        };
 
 
-        // Adicionar Painel Principal à Janela
-        add(mainPanel, BorderLayout.CENTER);
+        // Atualizar o modelo da tabela
 
-        setVisible(true);
+        model = new DefaultTableModel(consultasData, colunas);
+
+        JTable consultasTable = new JTable(model);
+        consultasTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        consultasTable.setRowHeight(25);
+        consultasTable.setSelectionBackground(new Color(184, 214, 247));
+        consultasTable.setSelectionForeground(Color.BLACK);
+
+        JScrollPane scrollPane = new JScrollPane(consultasTable);
+        centerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Painel de botões
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        buttonsPanel.setBackground(new Color(240, 248, 255));
+
+        JButton cadastrarButton = new JButton("Nova Consulta");
+        JButton editarButton = new JButton("Editar Consulta");
+        JButton deletarButton = new JButton("Deletar Consulta");
+
+        configurarBotao(cadastrarButton, new Color(40, 167, 69), Color.WHITE, e -> JOptionPane.showMessageDialog(null, "Adicionar Nova Consulta."));
+        configurarBotao(editarButton, new Color(255, 193, 7), Color.BLACK, e -> {
+            int selectedRow = consultasTable.getSelectedRow();
+            if (selectedRow == -1) {
+                String id = (String) model.getValueAt(selectedRow, 0);
+                JOptionPane.showMessageDialog(null, "Editar Consulta: ID - " + id);
+            } else {
+                JOptionPane.showMessageDialog(null, "Selecione uma consulta para editar.");
+            }
+        });
+        configurarBotao(deletarButton, new Color(220, 53, 69), Color.WHITE, e -> {
+            int selectedRow = consultasTable.getSelectedRow();
+            if (selectedRow == -1) {
+                model.removeRow(selectedRow);
+            } else {
+                JOptionPane.showMessageDialog(null, "Selecione um prontuário para deletar.");
+            }
+        });
+
+        /**
+         * Adicionar os métodos com as ações de cada botão
+         * ------------ Cadastro -------------
+         * 
+         */
+        cadastrarButton.addActionListener(e -> {
+            // Campos do formulário
+            JTextField idPacienteField = new JTextField();
+            JTextField idProfissionalField = new JTextField();
+            JTextField dataConsultaField = new JTextField();  
+            JTextField horaConsultaField = new JTextField();
+            JComboBox<String> statusConsultaComboBox = new JComboBox<>(new String[]{"AGENDADA", "CANCELADA", "CONCLUIDA"}); // Status da consulta
+            
+            // Painel do formulário
+            JPanel formPanel = new JPanel();
+            formPanel.setLayout(new GridLayout(6, 2, 10, 10)); 
+            formPanel.add(new JLabel("ID do Paciente:"));
+            formPanel.add(idPacienteField);
+            formPanel.add(new JLabel("ID do Profissional:"));
+            formPanel.add(idProfissionalField);
+            formPanel.add(new JLabel("Data da Consulta (yyyy-MM-dd):"));
+            formPanel.add(dataConsultaField);
+            formPanel.add(new JLabel("Hora da Consulta (HH:mm):"));
+            formPanel.add(horaConsultaField);
+            formPanel.add(new JLabel("Status da Consulta:"));
+            formPanel.add(statusConsultaComboBox);
+
+            // Exibe o formulário em um JOptionPane
+            int result = JOptionPane.showConfirmDialog(null, formPanel, "Cadastrar Consulta",
+                    JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            // Captura os dados preenchidos
+            if (result == JOptionPane.OK_OPTION) {
+                try {
+                    // Captura os valores dos campos
+                    String dataConsulta = dataConsultaField.getText();
+                    String horaConsulta = horaConsultaField.getText();
+                    String statusConsulta = (String) statusConsultaComboBox.getSelectedItem();
+
+                    // Cria uma nova consulta, add lógica do controller, no caso consulta
+                    
+
+                    model.addRow(new Object[]{
+                            String.valueOf(model.getRowCount() + 1),
+                            dataConsulta,
+                            horaConsulta,
+                            statusConsulta
+                    });
+
+                    JOptionPane.showMessageDialog(null, "Consulta cadastrada com sucesso");
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao cadastrar consulta: " + ex.getMessage());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        
+
+        /*
+         * --------- Editar Paciente ------------
+         */
+        editarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    int selectedRow = consultasTable.getSelectedRow(); 
+                    if (selectedRow != -1) {
+                        int idConsulta = (int) model.getValueAt(selectedRow, 0);
+            
+                        // Pegar os dados de acordo com a seleção feita
+                        int idPacienteAtual = (int) model.getValueAt(selectedRow, 1);
+                        int idProfissionalAtual = (int) model.getValueAt(selectedRow, 2);
+                        String dataConsultaAtual = (String) model.getValueAt(selectedRow, 3);
+                        String horaConsultaAtual = (String) model.getValueAt(selectedRow, 4);
+                        String statusConsultaAtual = (String) model.getValueAt(selectedRow, 5);
+            
+                        // Para as novas informações
+                        String novaDataConsulta = JOptionPane.showInputDialog("Informe a nova data da consulta (yyyy-MM-dd)", dataConsultaAtual);
+                        String novaHoraConsulta = JOptionPane.showInputDialog("Informe a nova hora da consulta (HH:mm)", horaConsultaAtual);
+                        String novoStatusConsulta = (String) JOptionPane.showInputDialog(null, "Selecione o novo status da consulta", "Status da Consulta",
+                                JOptionPane.QUESTION_MESSAGE, null, new String[]{"AGENDADA", "CANCELADA", "CONCLUIDA"}, statusConsultaAtual);
+            
+                        // Add lógica do controller, no caso a lógica está no model mesmo
+                        
+            
+                        // Atualizar a tabela com os novos valores
+                        model.setValueAt(novaDataConsulta, selectedRow, 3);
+                        model.setValueAt(novaHoraConsulta, selectedRow, 4);
+                        model.setValueAt(novoStatusConsulta, selectedRow, 5);
+            
+                        JOptionPane.showMessageDialog(null, "Consulta alterada com sucesso");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Selecione uma consulta para editar.");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Erro: " + ex.getMessage());
+                }
+            }
+        });
+        
+        
+        
+
+        /*
+         * --------- Deletar Paciente -----------
+         */
+        deletarButton.addActionListener(e -> {
+            int selectedRow = consultasTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String nomePaciente = (String) model.getValueAt(selectedRow, 1);  
+                int confirm = JOptionPane.showConfirmDialog(null,
+                        "Tem certeza que deseja deletar a consulta do paciente: " + nomePaciente + "?", "Confirmação",
+                        JOptionPane.YES_NO_OPTION);
+        
+                if (confirm == JOptionPane.YES_OPTION) {
+                    try {
+                        String idConsultaStr = (String) model.getValueAt(selectedRow, 0);
+                        int idConsulta = Integer.parseInt(idConsultaStr);  // Converte para inteiro
+        
+                        // Chama o método deleteConsulta do controlador para excluir a consulta
+                        Consulta consulta = new Consulta();
+                        consulta.deleteConsulta(idConsulta);
+        
+                        // Após a exclusão, remove a linha da tabela
+                        model.removeRow(selectedRow);
+                        JOptionPane.showMessageDialog(null, "Consulta excluída com sucesso!");
+        
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Erro ao excluir consulta: " + ex.getMessage());
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Selecione uma consulta para deletar.");
+            }
+        });
+        
+        
+
+        
+        buttonsPanel.add(cadastrarButton);
+        buttonsPanel.add(editarButton);
+        buttonsPanel.add(deletarButton);
+
+        centerPanel.add(buttonsPanel, BorderLayout.SOUTH);
+        add(centerPanel, BorderLayout.CENTER);
     }
 
-    private void voltarParaTelaProfissional() {
-        dispose();
-        new TelaProfissional().setVisible(true);
+    private void configurarBotao(JButton botao, Color corFundo, Color corTexto, ActionListener action) {
+        botao.setFont(new Font("Arial", Font.BOLD, 14));
+        botao.setBackground(corFundo);
+        botao.setForeground(corTexto);
+        botao.setFocusPainted(false);
+        botao.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        botao.addActionListener(action);
     }
 
-    /*
-     * Métodos para a funcionalidade dos botões
-     */
 
-
-
-
-    private void limparCampos() {
-        txtPaciente.setText("");
-        txtData.setText("");
-        txtHora.setText("");
-        cmbStatus.setSelectedIndex(0);
-    }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new TelaConsulta().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            TelaConsulta tela = new TelaConsulta();
+            tela.setVisible(true);
+        });
     }
 }
